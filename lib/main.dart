@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather_app/cache_helper.dart';
 import 'package:weather_app/cubit/bloc_observer.dart';
 import 'package:weather_app/cubit/change_theme_cubit/change_theme_cubit.dart';
+import 'package:weather_app/cubit/check_internet/check_internet_cubit.dart';
 import 'package:weather_app/pages/home_page.dart';
 
 void main() async {
@@ -21,21 +22,29 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ChangeThemeCubit()..changeMode(fromShared: isLight),
-      child:BlocBuilder<ChangeThemeCubit, ChangeThemeState>(
-  builder: (context, state) {
-    return MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
-        darkTheme: ThemeData.dark(useMaterial3: true),
-        themeMode: ChangeThemeCubit.get(context).isLight == true
-            ? ThemeMode.light
-            : ThemeMode.dark,
-        debugShowCheckedModeBanner: false,
-        home: const HomePage(),
-      );
-  },
-),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              ChangeThemeCubit()..changeMode(fromShared: isLight),
+        ),
+        BlocProvider(
+          create: (context) => CheckInternetCubit()..checkConnection(),
+        )
+      ],
+      child: BlocBuilder<ChangeThemeCubit, ChangeThemeState>(
+        builder: (context, state) {
+          return MaterialApp(
+            theme: ThemeData.light(useMaterial3: true),
+            darkTheme: ThemeData.dark(useMaterial3: true),
+            themeMode: ChangeThemeCubit.get(context).isLight == true
+                ? ThemeMode.light
+                : ThemeMode.dark,
+            debugShowCheckedModeBanner: false,
+            home: const HomePage(),
+          );
+        },
+      ),
     );
   }
 }
